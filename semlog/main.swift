@@ -32,13 +32,8 @@ if args.count > 1, args[1] == "--help" || args[1] == "-h" {
         exit(0)
     }
 } else {
-    print("interactive mode. Ctrl-C to end input")
-    var standardInput = FileHandle.standardInput
-    var inputData = FileHandle.standardInput.availableData
-    if let inputString = String.init(data: inputData, encoding: .utf8) {
-        changes = inputString
-    } else {
-        print("unable to get input")
+    while let inputData = readLine() {
+        changes += "\(inputData)\n"
     }
 }
 
