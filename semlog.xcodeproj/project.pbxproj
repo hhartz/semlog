@@ -143,7 +143,7 @@
 		};
 		6C1421391F0CD58A00DFE3A2 /* Show changes since last */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputPaths = (
@@ -151,7 +151,7 @@
 			name = "Show changes since last";
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "git shortlog `git describe --tags --abbrev=0`..HEAD | semlog | open -t -f";
 		};
