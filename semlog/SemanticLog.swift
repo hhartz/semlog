@@ -20,6 +20,10 @@ class Change {
         if let indexOfColon = log.characters.index(of: ":") {
             category = String(log.characters.prefix(upTo: indexOfColon)).trimmed.capitalized
             let indexAfterColon = log.index(indexOfColon, offsetBy: 1)
+            // ignore author
+            if indexAfterColon == log.endIndex {
+                return nil
+            }
             message = String(log.characters.suffix(from: indexAfterColon)).trimmed
         } else {
             category = "Other"
