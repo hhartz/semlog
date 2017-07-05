@@ -12,24 +12,28 @@ class Change {
     var category: String
     var message: String
 
-    init(with log: String) {
-        let change = log.components(separatedBy: ":")
-        if change.count != 2 {
-            category = "Other"
-            message = log
+    init?(with log: String) {
+        if log.trimmed.characters.count == 0 {
+            return nil
+        }
+
+        if let indexOfColon = log.characters.index(of: ":") {
+            category = String(log.characters.prefix(upTo: indexOfColon)).trimmed.capitalized
+            let indexAfterColon = log.index(indexOfColon, offsetBy: 1)
+            message = String(log.characters.suffix(from: indexAfterColon)).trimmed
         } else {
-            category = change[0].trimmed.lowercased().capitalized
-            message = change[1].trimmed
+            category = "Other"
+            message = log.trimmed
         }
     }
 }
 
 class SemanticLog {
-    var output: String
+    var output: String = ""
     var categories = NSDictionary()
 
     init(with changelist: String) {
-        categories = buildCategories(from: changelist)
+        categories = buildCategories(from: changelist.trimmed)
         output = categories.toString()
     }
 
@@ -37,10 +41,11 @@ class SemanticLog {
         let lines = changes.components(separatedBy: "\n")
         let categories = NSMutableDictionary()
         for line in lines {
-            let change = Change.init(with: line)
-            var categoryList = categories.value(forKey: change.category) as? [String] ?? [String]()
-            categoryList.append(change.message)
-            categories.setValue(categoryList, forKey: change.category)
+            if let change = Change.init(with: line) {
+                var categoryList = categories.value(forKey: change.category) as? [String] ?? [String]()
+                categoryList.append(change.message)
+                categories.setValue(categoryList, forKey: change.category)
+            }
         }
         return categories
     }
