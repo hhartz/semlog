@@ -77,9 +77,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6CE7AE901F04F88700204C95 /* Build configuration list for PBXNativeTarget "semlog" */;
 			buildPhases = (
+				6C1421381F0CD57C00DFE3A2 /* Bump build number */,
 				6CE7AE851F04F88700204C95 /* Sources */,
 				6CE7AE861F04F88700204C95 /* Frameworks */,
 				6CE7AE871F04F88700204C95 /* CopyFiles */,
+				6C1421391F0CD58A00DFE3A2 /* Show changes since last */,
 			);
 			buildRules = (
 			);
@@ -123,6 +125,37 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6C1421381F0CD57C00DFE3A2 /* Bump build number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Bump build number";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${INFOPLIST_FILE}\")\nbuildNumber=$(($buildNumber + 1))\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${INFOPLIST_FILE}\"";
+		};
+		6C1421391F0CD58A00DFE3A2 /* Show changes since last */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Show changes since last";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "git shortlog `git describe --tags --abbrev=0`..HEAD | semlog | open -t -f";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6CE7AE851F04F88700204C95 /* Sources */ = {
