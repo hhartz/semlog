@@ -11,9 +11,9 @@ import Foundation
 extension NSDictionary {
     func toString() -> String {
         var result = ""
-        for category in categories {
-            result += "\(category.key):\n"
-            if let descriptions = category.value as? [String] {
+        for category in allKeys {
+            result += "\(category):\n"
+            if let descriptions = self[category] as? [String] {
                 for description in descriptions {
                     result += "  - \(description)\n"
                 }
