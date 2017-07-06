@@ -20,23 +20,96 @@ func usage() {
 let args = CommandLine.arguments
 var changes = ""
 
-if args.count > 1, args[1] == "--help" || args[1] == "-h" {
+func exec(_ path: String, _ args: [String]) -> String? {
+    let execute = Process()
+    execute.launchPath = path
+    execute.arguments = args
+
+    let outPipe = Pipe()
+    execute.standardOutput = outPipe
+    execute.launch()
+
+    let data = outPipe.fileHandleForReading.readDataToEndOfFile()
+    if let string = String.init(data: data, encoding: .utf8), string.characters.count > 0 {
+        return string.trimmed
+    }
+    return nil
+}
+
+if args.contains("--help") || args.contains("-h") {
     usage()
     exit(0)
-} else if args.count > 2, let file = args[2].components(separatedBy: "=").last {
+}
+
+if let file = args.first(where: { $0.contains("--file") })?.components(separatedBy: "--file=").last {
     if let fileData = FileManager.default.contents(atPath: file),
         let fileString = String.init(data: fileData, encoding: .utf8) {
         changes = fileString
     } else {
         print("unable to open or read \"\(file)\"")
-        exit(0)
-    }
-} else {
-    while let inputData = readLine() {
-        changes += "\(inputData)\n"
+        exit(-1)
     }
 }
 
+if args.contains("--release") {
 
-let semlog = SemanticLog(with: changes)
-print(semlog.output)
+    var build = 0
+    let plistBuddy = "/usr/libexec/PlistBuddy"
+    let git = "/usr/local/bin/git"
+    let plist = args.first(where: { $0.contains("--plist=") })?.components(separatedBy: "=").last ?? "Info.plist"
+
+    // find the current build number
+    if let buildString = exec(plistBuddy, ["-c", "Print CFBundleVersion", plist])?.trimmed,
+        let buildNumber = Int.init(buildString) {
+        build = buildNumber
+    }
+
+    // increment the build number
+    build += 1
+    // set the new build number
+    _ = exec(plistBuddy, ["-c", "Set :CFBundleVersion \(build)", plist])
+
+    // find the current version, defaults to '0.1.0' CFBundleShortVersionString
+    var version = (exec(plistBuddy, ["-c", "Print CFBundleShortVersionString", plist]) ?? "0.1.0").trimmed
+    var versionFields = version.components(separatedBy: ".")
+
+    // increment maj,min,maint if needed
+    if args.contains("maintenance"), let maintenance = Int.init(versionFields[2]) {
+        versionFields[2] = "\(maintenance + 1)"
+    }
+    if args.contains("minor"), let minor = Int.init(versionFields[1]) {
+        versionFields[1] = "\(minor + 1)"
+    }
+    if args.contains("major"), let major = Int.init(versionFields[0]) {
+        versionFields[0] = "\(major + 1)"
+    }
+
+    version = versionFields.joined(separator: ".")
+    // set the updated values
+    _ = exec(plistBuddy, ["-c", "Set :CFBundleShortVersionString \(version)", plist])
+
+    // find changes since last tag
+    guard let lastTag = exec(git, ["describe", "--tags", "--abbrev=0"]), let changes = exec(git, ["shortlog", "\(lastTag)..HEAD"]), changes.characters.count > 0 else {
+        print("no changes")
+        exit(0)
+    }
+
+    let semlog = SemanticLog(with: changes)
+
+    // commit the new versions
+    _ = exec(git, ["add", plist])
+    _ = exec(git, ["commit", "-m", "chore: bump to \(version)-\(build)"])
+    var tagArguments = ["tag", "-a"]
+    let output = semlog.output
+    if output.characters.count > 0 {
+        tagArguments.append("-m")
+        tagArguments.append("\(output)")
+    }
+    tagArguments.append("\(version)-\(build)")
+    let gitTag = exec(git, tagArguments)
+
+    exit(0)
+} else {
+    let semlog = SemanticLog(with: changes)
+    print("\(semlog.output)")
+}
