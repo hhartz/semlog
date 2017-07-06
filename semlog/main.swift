@@ -100,7 +100,12 @@ if args.contains("--release") {
     _ = exec(git, ["add", plist])
     _ = exec(git, ["commit", "-m", "chore: bump to \(version)-\(build)"])
     var tagArguments = ["tag", "-a"]
-    let output = semlog.output
+    var output = semlog.output
+
+    if let displayName = exec(plistBuddy, ["-c", "Print CFBundleDisplayName", plist])?.trimmed {
+        output = displayName + " \(version)-\(build)\n\n" + output
+    }
+
     if output.characters.count > 0 {
         tagArguments.append("-m")
         tagArguments.append("\(output)")
