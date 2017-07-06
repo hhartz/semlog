@@ -51,6 +51,12 @@ if let file = args.first(where: { $0.contains("--file") })?.components(separated
     }
 }
 
+if args.count == 1 {
+    while let inputData = readLine() {
+        changes += "\(inputData)\n"
+    }
+}
+
 if args.contains("--release") {
 
     var build = 0
