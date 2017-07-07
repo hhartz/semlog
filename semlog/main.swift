@@ -65,7 +65,7 @@ if args.contains("--release") {
     let plist = args.first(where: { $0.contains("--plist=") })?.components(separatedBy: "=").last ?? "Info.plist"
 
     if !FileManager.default.fileExists(atPath: plist) {
-        print("could not find plist \(plist)")
+        print("could not find plist \(plist). You can specify a path using --plist=path/to/Info.plist")
         exit(-1)
     }
 
