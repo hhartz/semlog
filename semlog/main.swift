@@ -64,6 +64,11 @@ if args.contains("--release") {
     let git = "/usr/local/bin/git"
     let plist = args.first(where: { $0.contains("--plist=") })?.components(separatedBy: "=").last ?? "Info.plist"
 
+    if !FileManager.default.fileExists(atPath: plist) {
+        print("could not find plist \(plist)")
+        exit(-1)
+    }
+
     // find the current build number
     if let buildString = exec(plistBuddy, ["-c", "Print CFBundleVersion", plist])?.trimmed,
         let buildNumber = Int.init(buildString) {
