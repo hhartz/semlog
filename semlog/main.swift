@@ -127,6 +127,17 @@ if args.contains("--release") {
     tagArguments.append("\(version)-\(build)")
     let gitTag = exec(git, tagArguments)
 
+    print("comitted and tagged \(version)-\(build). Opening changelog in default text editor..")
+    let open = Process()
+    open.launchPath = "/usr/bin/open"
+    open.arguments = ["-t", "-f"]
+    let stringPipe = Pipe()
+    if let data = output.data(using: .utf8) {
+        stringPipe.fileHandleForWriting.write(data)
+    }
+    open.standardInput = stringPipe
+    open.launch()
+
     exit(0)
 } else {
     let semlog = SemanticLog(with: changes)
