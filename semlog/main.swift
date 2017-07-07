@@ -84,9 +84,12 @@ if args.contains("--release") {
         versionFields[2] = "\(maintenance + 1)"
     }
     if args.contains("minor"), let minor = Int.init(versionFields[1]) {
+        versionFields[2] = "0"
         versionFields[1] = "\(minor + 1)"
     }
     if args.contains("major"), let major = Int.init(versionFields[0]) {
+        versionFields[2] = "0"
+        versionFields[1] = "0"
         versionFields[0] = "\(major + 1)"
     }
 
